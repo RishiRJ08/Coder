@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kitty Cat — For Kids</title>
+  <style>
+    body{font-family: 'Comic Sans MS', ComicSans, cursive; background:#FFF8E7; color:#333; margin:0; padding:2rem;}
+    .card{max-width:680px;margin:0 auto;background:#fff;border-radius:16px;padding:1.4rem;box-shadow:0 6px 18px rgba(0,0,0,0.08);text-align:center}
+    h1{color:#D35400;margin:0 0 0.6rem;font-size:2.2rem}
+    p{font-size:1.1rem;margin:0.6rem 0}
+    svg{width:260px;height:auto}
+    ul{list-style:circle inside;text-align:left;padding-left:0;margin:0.6rem 0 0}
+    li{margin:0.4rem 0;font-size:1.05rem}
+    button{background:#FF7A00;color:#fff;border:none;padding:12px 18px;border-radius:10px;font-size:1rem;margin-top:12px;cursor:pointer}
+    footer{font-size:0.9rem;color:#666;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Kitty Cat!</h1>
+
+    <!-- Cute, simple inline SVG cat illustration for kids -->
+    <svg viewBox="0 0 200 200" role="img" aria-label="Cute cartoon cat">
+      <!-- body -->
+      <ellipse cx="100" cy="125" rx="60" ry="48" fill="#FFD59A" stroke="#E39B47" stroke-width="2"/>
+      <!-- head -->
+      <circle cx="100" cy="70" r="44" fill="#FFD59A" stroke="#E39B47" stroke-width="2"/>
+      <!-- ears -->
+      <polygon points="66,40 84,18 96,46" fill="#FFD59A" stroke="#E39B47" stroke-width="2"/>
+      <polygon points="134,40 116,18 104,46" fill="#FFD59A" stroke="#E39B47" stroke-width="2"/>
+      <!-- inner ears -->
+      <polygon points="74,36 84,24 90,40" fill="#FFB98A"/>
+      <polygon points="126,36 116,24 110,40" fill="#FFB98A"/>
+      <!-- eyes -->
+      <ellipse cx="86" cy="70" rx="7" ry="10" fill="#3B3B3B"/>
+      <ellipse cx="114" cy="70" rx="7" ry="10" fill="#3B3B3B"/>
+      <!-- nose -->
+      <path d="M100 82 q6 6 0 12 q-6 -6 0 -12" fill="#FF9F9F" stroke="#D65" stroke-width="1"/>
+      <!-- mouth -->
+      <path d="M94 94 q6 6 12 0" fill="none" stroke="#B34" stroke-width="2" stroke-linecap="round"/>
+      <!-- whiskers -->
+      <line x1="64" y1="86" x2="96" y2="86" stroke="#B34" stroke-width="2"/>
+      <line x1="104" y1="86" x2="136" y2="86" stroke="#B34" stroke-width="2"/>
+      <!-- tail -->
+      <path d="M156 120 q28 -10 20 -30" fill="none" stroke="#E39B47" stroke-width="8" stroke-linecap="round"/>
+    </svg>
+
+    <p>Hello! This is a friendly kitty. Cats like to purr, play with toys, and take cozy naps.</p>
+
+    <button id="meow">Make the cat say "Meow"</button>
+
+    <h2 style="margin-top:12px;color:#E67E22">Fun Facts</h2>
+    <ul>
+      <li>Cats say "meow" to talk to people.</li>
+      <li>They can jump very high — kitties are great climbers!</li>
+      <li>Cats sleep a lot: up to 16 hours every day.</li>
+    </ul>
+
+    <footer>Tap the button to hear the cat. Perfect for little kids!</footer>
+  </div>
+
+  <script>
+    // Use SpeechSynthesis for a fun "meow" sound if supported
+    const btn = document.getElementById('meow');
+    btn.addEventListener('click', () => {
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance('Meow');
+        u.pitch = 1.8; u.rate = 1.05; u.volume = 1;
+        speechSynthesis.speak(u);
+      } else {
+        alert('Meow!');
+      }
+    });
+  </script>
+</body>
+</html>
