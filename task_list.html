@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Task List</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; max-width:720px; margin:40px auto; padding:0 16px; }
+    h1 { text-align:center; }
+    #input-area { display:flex; gap:8px; margin-bottom:16px; }
+    #task-input { flex:1; padding:8px 10px; font-size:16px; border:1px solid #ccc; border-radius:6px; }
+    #add-btn { padding:8px 12px; font-size:16px; border:none; background:#0078d4; color:white; border-radius:6px; cursor:pointer; }
+    #add-btn:active { transform:translateY(1px); }
+    ul#tasks { list-style:none; padding:0; margin:0; }
+    ul#tasks li { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid #eee; border-radius:6px; margin-bottom:8px; background:#fafafa; }
+    ul#tasks li .text { word-break:break-word; }
+    button.delete { background:#e74c3c; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
+    button.delete:active { transform:translateY(1px); }
+  </style>
+</head>
+<body>
+  <h1>Task List</h1>
+
+  <div id="input-area">
+    <input id="task-input" type="text" placeholder="Enter a task and press Add or Enter" aria-label="Task input" />
+    <button id="add-btn">Add Task</button>
+  </div>
+
+  <ul id="tasks" aria-live="polite"></ul>
+
+  <script>
+    const input = document.getElementById('task-input');
+    const addBtn = document.getElementById('add-btn');
+    const tasks = document.getElementById('tasks');
+
+    function createTaskItem(text) {
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      span.className = 'text';
+      span.textContent = text;
+
+      const del = document.createElement('button');
+      del.className = 'delete';
+      del.type = 'button';
+      del.textContent = 'Delete';
+      del.addEventListener('click', () => { li.remove(); });
+
+      li.appendChild(span);
+      li.appendChild(del);
+      return li;
+    }
+
+    function addTask() {
+      const value = input.value.trim();
+      if (!value) return;
+      const item = createTaskItem(value);
+      tasks.appendChild(item);
+      input.value = '';
+      input.focus();
+    }
+
+    addBtn.addEventListener('click', addTask);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+  </script>
+</body>
+</html>
