@@ -1,0 +1,14 @@
+name: Coder GitHub App
+url: http://localhost:5000
+hook_attributes:
+  url: http://localhost:5000/webhook
+  active: true
+redirect_url: http://localhost:5000/setup
+public: false
+default_permissions:
+  contents: read
+  issues: write
+  pull_requests: write
+default_events:
+  - push
+  - pull_request

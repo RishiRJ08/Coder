@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Whack-a-Monster — Bunny Smash</title>
+  <style>
+    :root{--bg1:#ffecd2;--bg2:#080605;--card:#ffffff;--accent:#ff6b6b;--monster:#ffb86b;--bunny:#f6f8ff}
+    body{font-family:Segoe UI, Roboto, Arial, sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));margin:0;color:#222;display:flex;min-height:100vh;align-items:center;justify-content:center}
+    .wrap{width:920px;max-width:96%;background:var(--card);padding:18px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.12);border:1px solid rgba(0,0,0,.04)}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    h1{font-size:1.1rem;margin:0;color:#333}
+    .controls{display:flex;gap:8px;align-items:center}
+    .controls input[type="text"]{padding:6px;border-radius:8px;border:1px solid #eee}
+    button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;box-shadow:0 4px 12px rgba(255,107,107,.18)}
+    .meta{display:flex;gap:14px;align-items:center}
+    .board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px}
+    .hole{background:linear-gradient(180deg,#ffffff,#f2f7ff);border-radius:14px;height:120px;display:flex;align-items:center;justify-content:center;position:relative;user-select:none;cursor:pointer;font-size:48px;box-shadow:inset 0 -6px 18px rgba(0,0,0,.03)}
+    .popup{position:absolute;transform:translateY(16px);transition:transform .18s cubic-bezier(.2,.9,.2,1),opacity .18s;opacity:0}
+    .popup.up{transform:translateY(0);opacity:1}
+    .creature{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:#333;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+    .monster{background:linear-gradient(180deg,#ffd27a,#ffb86b);border:3px solid #ff9550;animation:monsterBounce 1.4s infinite}
+    .bunny{background:linear-gradient(180deg,#ffffff,#f6f8ff);border:3px solid #dbe6ff;animation:bunnyHop 1s infinite}
+    @keyframes monsterBounce{0%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-8px) rotate(4deg)}100%{transform:translateY(0) rotate(-4deg)}}
+    @keyframes bunnyHop{0%{transform:translateY(0)}40%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+    .scoreboard{margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+    .leaderboard{width:260px;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:10px;padding:12px;border:1px solid #eef6ff}
+    .small{font-size:0.9rem;color:#555}
+    .smash{animation:smash .25s ease}
+    @keyframes smash{0%{transform:scale(1)}50%{transform:scale(.75) rotate(-8deg)}100%{transform:scale(1)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Whack-a-Monster — Bunny Smash</h1>
+      <div class="controls">
+        <input id="playerName" type="text" placeholder="Your name (optional)" />
+        <button id="startBtn">Start</button>
+      </div>
+    </header>
+
+    <div class="meta">
+      <div><strong>Score:</strong> <span id="score">0</span></div>
+      <div><strong>Time:</strong> <span id="time">30</span>s</div>
+      <div><strong>Lives:</strong> <span id="lives">3</span></div>
+      <div class="small">Click monsters to earn points. Clicking bunnies costs a life.</div>
+    </div>
+
+    <main style="display:flex;gap:16px;margin-top:12px">
+      <div style="flex:1">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <label class="small">Difficulty:</label>
+          <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="normal" selected>Normal</option>
+            <option value="hard">Hard</option>
+          </select>
+          <button id="startBtn">Start</button>
+        </div>
+
+        <div class="board" id="board">
+          <!-- 9 holes -->
+        </div>
+      </div>
+
+      <aside class="leaderboard">
+        <strong>Leaderboard</strong>
+        <ol id="leaders" style="padding-left:18px;margin-top:8px"></ol>
+        <div class="small" style="margin-top:8px">Top scores are saved on the server.</div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    // Simple Whack-a-Monster logic using emojis and synthesized sounds
+    const board = document.getElementById('board');
+    const scoreEl = document.getElementById('score');
+    const timeEl = document.getElementById('time');
+    const startBtn = document.getElementById('startBtn');
+    const playerName = document.getElementById('playerName');
+    const leaders = document.getElementById('leaders');
+    const livesEl = document.getElementById('lives');
+    const difficultyEl = document.getElementById('difficulty');
+
+    let holes = [];
+    let score = 0;
+    let timeLeft = 30;
+    let lives = 3;
+    let gameInterval = null;
+    let spawnInterval = null;
+
+    // audio context for simple beeps and background music
+    let audioCtx = null;
+    let musicInterval = null;
+    function ensureAudio(){ if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+
+    function beep(freq=440,dur=0.08,type='sine',gain=0.12){
+      try{
+        ensureAudio();
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type; o.frequency.value = freq;
+        g.gain.value = gain;
+        o.connect(g); g.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        g.gain.setValueAtTime(gain, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+        o.start(now);
+        o.stop(now + dur + 0.02);
+      }catch(e){}
+    }
+
+    // hit/miss sounds
+    function playHit(){ beep(880,0.09,'square',0.16); }
+    function playMiss(){ beep(200,0.18,'sawtooth',0.18); }
+
+    // simple background music loop (synth chords + arpeggio)
+    function startMusic(){
+      try{
+        ensureAudio();
+        if (musicInterval) return;
+        const base = 220; // A3
+        let step = 0;
+        musicInterval = setInterval(()=>{
+          const t = audioCtx.currentTime;
+          // bass thump
+          const o1 = audioCtx.createOscillator();
+          const g1 = audioCtx.createGain();
+          o1.type='sine'; o1.frequency.value = base * (step%2?0.5:1);
+          g1.gain.value = 0.06;
+          o1.connect(g1); g1.connect(audioCtx.destination);
+          o1.start(t); o1.stop(t+0.18);
+
+          // pluck arpeggio notes
+          const notes = [1.0, 1.26, 1.5];
+          notes.forEach((n,i)=>{
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'triangle'; o.frequency.value = base * n * (1 + (step%3)*0.02);
+            g.gain.value = 0.035 / (i+1);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(t + i*0.06);
+            o.stop(t + 0.2 + i*0.06);
+          });
+
+          step = (step + 1) % 8;
+        }, 420);
+      }catch(e){console.warn(e)}
+    }
+
+    function stopMusic(){ if (musicInterval){ clearInterval(musicInterval); musicInterval = null; } }
+
+    // Create 9 holes
+    for (let i=0;i<9;i++){
+      const hole = document.createElement('div');
+      hole.className = 'hole';
+      hole.dataset.index = i;
+      board.appendChild(hole);
+      holes.push(hole);
+    }
+
+    function random(ms){ return Math.floor(Math.random()*ms); }
+
+    function difficultySettings(){
+      const d = difficultyEl.value;
+      if (d === 'easy') return {spawnRate:800, monsterProb:0.75, time:40, lives:5};
+      if (d === 'hard') return {spawnRate:420, monsterProb:0.6, time:25, lives:2};
+      return {spawnRate:600, monsterProb:0.7, time:30, lives:3};
+    }
+
+    function spawn(){
+      const idx = random(holes.length);
+      const hole = holes[idx];
+      if (hole.dataset.active==='1') return; // already occupied
+
+      const cfg = difficultySettings();
+      const isMonster = Math.random() < cfg.monsterProb; // monster vs bunny
+      const pop = document.createElement('div');
+      pop.className = 'popup';
+      // use small inline SVGs for clearer visuals
+      if (isMonster){ pop.innerHTML = '<div class="creature monster">👾</div>'; }
+      else { pop.innerHTML = '<div class="creature bunny">🐰</div>'; }
+
+      hole.appendChild(pop);
+      hole.dataset.active='1';
+
+      // show
+      requestAnimationFrame(()=> pop.classList.add('up'));
+
+      const visibleFor = 520 + random(900); // ms
+      const remove = ()=>{
+        pop.classList.remove('up');
+        setTimeout(()=>{
+          if (hole.contains(pop)) hole.removeChild(pop);
+          hole.dataset.active='0';
+        },150);
+      }
+
+      // click handler
+      pop.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        pop.classList.add('smash');
+        if (isMonster){ score += 1; scoreEl.innerText = score; playHit(); }
+        else { lives -= 1; livesEl.innerText = lives; playMiss(); }
+        remove();
+        // check lives
+        if (lives <= 0){ endGame(true); }
+      });
+
+      // auto remove
+      setTimeout(remove, visibleFor);
+    }
+
+    function startGame(){
+      const cfg = difficultySettings();
+      score = 0; scoreEl.innerText = score;
+      timeLeft = cfg.time; timeEl.innerText = timeLeft;
+      lives = cfg.lives; livesEl.innerText = lives;
+      startBtn.disabled = true;
+
+      // ensure audio context resumed and start background music
+      try{ ensureAudio(); if (audioCtx.state === 'suspended') audioCtx.resume(); startMusic(); }catch(e){}
+
+      spawn();
+      spawnInterval = setInterval(spawn, cfg.spawnRate);
+
+      gameInterval = setInterval(()=>{
+        timeLeft -= 1; timeEl.innerText = timeLeft;
+        if (timeLeft <= 0){ endGame(false); }
+      },1000);
+    }
+
+    function endGame(outOfLives){
+      clearInterval(gameInterval); clearInterval(spawnInterval);
+      startBtn.disabled = false;
+      // clear popups
+      holes.forEach(h=>{ h.dataset.active='0'; while(h.firstChild) h.removeChild(h.firstChild); });
+      // send score to server
+      const name = playerName.value.trim() || 'Anon';
+      // if out of lives, reduce score as penalty
+      const finalScore = Math.max(0, score - (outOfLives ? 2 : 0));
+      fetch('/submit_score', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,score:finalScore})})
+        .then(()=> loadLeaderboard())
+        .catch(()=> loadLeaderboard());
+      // stop music on end
+      stopMusic();
+      setTimeout(()=> alert('Game over! Your score: '+finalScore), 50);
+    }
+
+    startBtn.addEventListener('click', ()=>{
+      // resume audio on user gesture
+      try{ ensureAudio(); if (audioCtx.state === 'suspended') audioCtx.resume(); }catch(e){}
+      startGame();
+    });
+
+    // Load leaderboard
+    function loadLeaderboard(){
+      fetch('/scores').then(r=>r.json()).then(data=>{
+        leaders.innerHTML = '';
+        data.slice(0,10).forEach(s=>{
+          const li = document.createElement('li');
+          li.innerText = `${s.name} — ${s.score}`;
+          leaders.appendChild(li);
+        });
+      }).catch(()=>{
+        leaders.innerHTML = '<li>Server not available</li>';
+      });
+    }
+
+    // initial load
+    loadLeaderboard();
+  </script>
+</body>
+</html>

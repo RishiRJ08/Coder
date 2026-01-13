@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Machines That Think–How Artificial Intelligence Works and What It Means for Us",
+    "url": "https://www.sap-press.com/machines-that-think_6171/",
+    "description": "Artificial intelligence is no longer confined to science fiction. It recommends what we watch, curates what we read, and drives critical business decisions. Learn how AI works and what it means for us."
+  },
+  {
+    "title": "Applied Machine Learning",
+    "url": "https://www.sap-press.com/applied-machine-learning_6170/",
+    "description": "Put machine learning theory into practice with this hands-on guide! Learn about the real-world application of machine learning models and how to implement them in your projects."
+  },
+  {
+    "title": "PyTorch–The Practical Guide",
+    "url": "https://www.sap-press.com/pytorch_6207/",
+    "description": "PyTorch is the framework for deep learning—so dive on in! Learn how to train, optimize, and deploy AI models using PyTorch, one of the most popular deep learning frameworks."
+  },
+  {
+    "title": "Keras 3–The Comprehensive Guide to Deep Learning with the Keras API and Python",
+    "url": "https://www.sap-press.com/keras-3_6142/",
+    "description": "Harness the power of AI with this guide to using Keras! Start by reviewing the fundamentals of deep learning and how to build neural networks with the Keras API."
+  },
+  {
+    "title": "Developing Apps with SAP Build Code and Generative AI",
+    "url": "https://www.sap-press.com/developing-apps-with-sap-build-code-and-generative-ai_6230/",
+    "description": "Are you ready to make the most of SAP's generative AI-powered developer tools? With this guide, learn how to develop apps using AI-powered code generation."
+  },
+  {
+    "title": "Hardware Security–The Practical Guide to Penetration Testing and Prevention",
+    "url": "https://www.sap-press.com/hardware-security_6181/",
+    "description": "Defend your system against hardware-based security breaches by thinking like a hacker! Learn about AI-driven security threats and prevention methods."
+  },
+  {
+    "title": "Python 3–The Comprehensive Guide",
+    "url": "https://www.sap-press.com/python-3_5566/",
+    "description": "Ready to master Python? Learn to write effective code with this award-winning comprehensive guide. Python is the go-to language for AI and machine learning development."
+  },
+  {
+    "title": "Google Analytics 4–The Practical Guide",
+    "url": "https://www.sap-press.com/google-analytics-4_6180/",
+    "description": "Frustrated by the complexities of Google Analytics 4? Let us show you the way! Learn to use AI-powered insights for data analytics and decision making."
+  }
+]
